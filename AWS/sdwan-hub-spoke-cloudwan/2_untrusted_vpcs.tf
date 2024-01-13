@@ -1,0 +1,50 @@
+#------------------------------------------------------------------------------
+# VPC Spoke to CORE NET
+#------------------------------------------------------------------------------
+# Create VPC spoke to Core Network
+module "eu_spoke_to_core_net" {
+  for_each = local.eu_spoke_to_core_net
+  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc?ref=v0.0.1"
+
+  prefix     = "${local.prefix}-eu-core-net-spoke"
+  admin_cidr = local.admin_cidr
+  azs        = local.eu_azs
+  
+  cidr = each.value
+
+  public_subnet_names  = ["vm"]
+  private_subnet_names = ["corenet"]
+}
+# Update private RT route RFC1918 cidrs to FGT NI and Core Network
+module "eu_spoke_to_core_net_routes" {
+  for_each = local.eu_spoke_to_core_net
+  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc_routes?ref=v0.0.1"
+
+  core_network_arn = local.core_network_arn
+  core_network_rt_ids = { for pair in setproduct(["vm"], [for i, az in local.eu_azs : "az${i + 1}"]) :
+    "${pair[0]}-${pair[1]}" => module.eu_spoke_to_core_net[each.key].rt_ids[pair[1]][pair[0]]
+  }
+}
+# Crate test VM in bastion subnet
+module "eu_spoke_to_core_net_vm" {
+  for_each = local.eu_spoke_to_core_net
+  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vm?ref=v0.0.1"
+
+  prefix          = "${local.prefix}-${each.key}"
+  keypair         = aws_key_pair.eu_keypair.key_name
+  subnet_id       = module.eu_spoke_to_core_net[each.key].subnet_ids["az1"]["vm"]
+  subnet_cidr     = module.eu_spoke_to_core_net[each.key].subnet_cidrs["az1"]["vm"]
+  security_groups = [module.eu_spoke_to_core_net[each.key].sg_ids["default"]]
+}
+# Create VPC Core Net attachament
+resource "aws_networkmanager_vpc_attachment" "eu_spoke_to_core_net_attachment" {
+  for_each = local.eu_spoke_to_core_net
+
+  subnet_arns     = [for i, az in local.eu_azs : module.eu_spoke_to_core_net[each.key].subnet_arns["az${i + 1}"]["corenet"]]
+  core_network_id = local.core_network_id
+  vpc_arn         = module.eu_spoke_to_core_net[each.key].vpc_arn
+
+  tags = {
+    segment = "Untrusted"
+  }
+}
