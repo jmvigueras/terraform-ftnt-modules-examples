@@ -6,7 +6,8 @@
 #------------------------------------------------------------------------------
 # Create VPC for hub EU
 module "eu_hub_vpc" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc?ref=v0.0.1"
+  source  = "jmvigueras/ftnt-modules/aws//modules/vpc"
+  version = "0.0.1"
 
   prefix     = "${local.prefix}-eu-hub"
   admin_cidr = local.admin_cidr
@@ -20,7 +21,8 @@ module "eu_hub_vpc" {
 }
 # Create FGT NIs
 module "eu_hub_nis" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//fgt_ni_sg?ref=v0.0.1"
+  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_ni_sg"
+  version = "0.0.1"
 
   prefix             = "${local.prefix}-eu-hub"
   azs                = local.eu_azs
@@ -32,7 +34,9 @@ module "eu_hub_nis" {
 }
 module "eu_hub_config" {
   for_each = { for k, v in module.eu_hub_nis.fgt_ports_config : k => v }
-  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//fgt_config?ref=v0.0.1"
+
+  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_config"
+  version = "0.0.1"
 
   admin_cidr     = local.admin_cidr
   admin_port     = local.admin_port
@@ -55,7 +59,8 @@ module "eu_hub_config" {
 }
 # Create FGT for hub EU
 module "eu_hub" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//fgt?ref=v0.0.1"
+  source  = "jmvigueras/ftnt-modules/aws//modules/fgt"
+  version = "0.0.1"
 
   prefix        = "${local.prefix}-eu-hub"
   region        = local.eu_region
@@ -70,7 +75,8 @@ module "eu_hub" {
 }
 # Update private RT route RFC1918 cidrs to FGT NI and Core Network
 module "eu_hub_vpc_routes" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc_routes?ref=v0.0.1"
+  source  = "jmvigueras/ftnt-modules/aws//modules/vpc_routes"
+  version = "0.0.1"
 
   ni_id     = module.eu_hub_nis.fgt_ids_map["az1.fgt1"]["port2.private"]
   ni_rt_ids = local.eu_hub_ni_rt_ids
@@ -80,7 +86,8 @@ module "eu_hub_vpc_routes" {
 }
 # Crate test VM in bastion subnet
 module "eu_hub_vm" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vm?ref=v0.0.1"
+  source  = "jmvigueras/ftnt-modules/aws//modules/vm"
+  version = "0.0.1"
 
   prefix          = "${local.prefix}-eu-hub"
   keypair         = aws_key_pair.eu_keypair.key_name

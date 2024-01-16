@@ -6,7 +6,8 @@
 #------------------------------------------------------------------------------
 # Create VPC for hub EU
 module "eu_hub_vpc" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc"
+  source  = "jmvigueras/ftnt-modules/aws//modules/vpc"
+  version = "0.0.1"
 
   prefix     = "${local.prefix}-eu-hub"
   admin_cidr = local.admin_cidr
@@ -20,7 +21,8 @@ module "eu_hub_vpc" {
 }
 # Create FGT NIs
 module "eu_hub_nis" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//fgt_ni_sg"
+  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_ni_sg"
+  version = "0.0.1"
 
   prefix             = "${local.prefix}-eu-hub"
   azs                = local.eu_azs
@@ -32,7 +34,9 @@ module "eu_hub_nis" {
 }
 module "eu_hub_config" {
   for_each = { for k, v in module.eu_hub_nis.fgt_ports_config : k => v }
-  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//fgt_config"
+
+  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_config"
+  version = "0.0.1"
 
   admin_cidr     = local.admin_cidr
   admin_port     = local.admin_port
@@ -68,7 +72,8 @@ module "eu_hub_config" {
 }
 # Create FGT for hub EU
 module "eu_hub" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//fgt"
+  source  = "jmvigueras/ftnt-modules/aws//modules/fgt"
+  version = "0.0.1"
 
   prefix        = "${local.prefix}-eu-hub"
   region        = local.eu_region
@@ -83,7 +88,8 @@ module "eu_hub" {
 }
 # Create TGW
 module "eu_tgw" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//tgw"
+  source  = "jmvigueras/ftnt-modules/aws//modules/tgw"
+  version = "0.0.1"
 
   prefix = "${local.prefix}-eu-hub"
 
@@ -92,7 +98,8 @@ module "eu_tgw" {
 }
 # Create TGW attachment
 module "eu_hub_vpc_tgw_attachment" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//tgw_attachment"
+  source  = "jmvigueras/ftnt-modules/aws//modules/tgw_attachment"
+  version = "0.0.1"
 
   prefix = "${local.prefix}-eu-hub"
 
@@ -108,7 +115,8 @@ module "eu_hub_vpc_tgw_attachment" {
 }
 # Create TGW attachment connect
 module "eu_hub_vpc_tgw_connect" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//tgw_connect"
+  source  = "jmvigueras/ftnt-modules/aws//modules/tgw_connect"
+  version = "0.0.1"
 
   prefix = "${local.prefix}-eu-hub"
 
@@ -123,7 +131,8 @@ module "eu_hub_vpc_tgw_connect" {
 }
 # Update private RT route RFC1918 cidrs to FGT NI and TGW
 module "eu_hub_vpc_routes" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc_routes"
+  source  = "jmvigueras/ftnt-modules/aws//modules/vpc_routes"
+  version = "0.0.1"
 
   tgw_id = module.eu_tgw.tgw_id
   ni_id  = module.eu_hub_nis.fgt_ids_map["az1.fgt1"]["port2.private"]
@@ -134,7 +143,8 @@ module "eu_hub_vpc_routes" {
 
 # Crate test VM in bastion subnet
 module "eu_hub_vm" {
-  source = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vm"
+  source  = "jmvigueras/ftnt-modules/aws//modules/vm"
+  version = "0.0.1"
 
   prefix          = "${local.prefix}-eu-hub"
   keypair         = aws_key_pair.eu_keypair.key_name
@@ -148,7 +158,9 @@ module "eu_hub_vm" {
 # Create VPC spoke to TGW
 module "eu_spoke_to_tgw" {
   for_each = local.eu_spoke_to_tgw
-  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc"
+
+  source  = "jmvigueras/ftnt-modules/aws//modules/vpc"
+  version = "0.0.1"
 
   prefix = "${local.prefix}-eu-tgw-spoke"
   azs    = local.eu_azs
@@ -161,7 +173,9 @@ module "eu_spoke_to_tgw" {
 # Create TGW attachment
 module "eu_spoke_to_tgw_attachment" {
   for_each = local.eu_spoke_to_tgw
-  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//tgw_attachment"
+
+  source  = "jmvigueras/ftnt-modules/aws//modules/tgw_attachment"
+  version = "0.0.1"
 
   prefix = "${local.prefix}-${each.key}"
 
@@ -176,7 +190,9 @@ module "eu_spoke_to_tgw_attachment" {
 # Update private RT route RFC1918 cidrs to FGT NI and TGW
 module "eu_spoke_to_tgw_routes" {
   for_each = local.eu_spoke_to_tgw
-  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vpc_routes"
+
+  source  = "jmvigueras/ftnt-modules/aws//modules/vpc_routes"
+  version = "0.0.1"
 
   tgw_id = module.eu_tgw.tgw_id
   tgw_rt_ids = { for pair in setproduct(["vm"], [for i, az in local.eu_azs : "az${i + 1}"]) :
@@ -186,7 +202,9 @@ module "eu_spoke_to_tgw_routes" {
 # Crate test VM in bastion subnet
 module "eu_spoke_to_tgw_vm" {
   for_each = local.eu_spoke_to_tgw
-  source   = "git::github.com/jmvigueras/terraform-ftnt-aws-modules//vm"
+
+  source  = "jmvigueras/ftnt-modules/aws//modules/vm"
+  version = "0.0.1"
 
   prefix          = "${local.prefix}-${each.key}"
   keypair         = aws_key_pair.eu_keypair.key_name
