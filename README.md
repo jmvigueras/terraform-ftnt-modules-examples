@@ -3,7 +3,10 @@
 This is a collection of examples for showcase how to use Terraform Fortinet modules.
 
 ## Cloud folders:
-- [AWS cloud](./AWS)
+- [Amazon Web Services cloud](./AWS)
+- [Azure cloud](./Azure)
+- [Google cloud](./GCP)
+- [Oracle cloud](./OCI)
 
 ## Deployment considerations:
    - Create file terraform.tfvars using terraform.tfvars.example as template 
