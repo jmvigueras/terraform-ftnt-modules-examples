@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------
 # Create VPC for hub EU
 module "eu_op_vpc" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/vpc"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc"
   version = "0.0.1"
 
   prefix     = "${local.prefix}-eu-op"
@@ -21,7 +21,7 @@ module "eu_op_vpc" {
 }
 # Create FGT NIs
 module "eu_op_nis" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_ni_sg"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_ni_sg"
   version = "0.0.1"
 
   prefix             = "${local.prefix}-eu-op"
@@ -35,7 +35,7 @@ module "eu_op_nis" {
 module "eu_op_config" {
   for_each = { for k, v in module.eu_op_nis.fgt_ports_config : k => v }
 
-  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_config"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_config"
   version = "0.0.1"
 
   admin_cidr     = local.admin_cidr
@@ -62,7 +62,7 @@ module "eu_op_config" {
 }
 # Create FGT for hub EU
 module "eu_op" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/fgt"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt"
   version = "0.0.1"
 
   prefix        = "${local.prefix}-eu-op"
@@ -78,7 +78,7 @@ module "eu_op" {
 }
 # Create TGW attachment
 module "eu_op_vpc_tgw_attachment" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/tgw_attachment"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/tgw_attachment"
   version = "0.0.1"
 
   prefix = "${local.prefix}-eu-op"
@@ -95,7 +95,7 @@ module "eu_op_vpc_tgw_attachment" {
 }
 # Update private RT route RFC1918 cidrs to FGT NI and TGW
 module "eu_op_vpc_routes" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/vpc_routes"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
   version = "0.0.1"
 
   tgw_id = module.eu_tgw.tgw_id
@@ -106,7 +106,7 @@ module "eu_op_vpc_routes" {
 }
 # Crate test VM in bastion subnet
 module "eu_op_vm" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/vm"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
   version = "0.0.1"
 
   prefix          = "${local.prefix}-eu-op"

@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------
 # Create VPC for hub EU
 module "eu_hub_vpc" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/vpc"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc"
   version = "0.0.1"
 
   prefix     = "${local.prefix}-eu-hub"
@@ -21,7 +21,7 @@ module "eu_hub_vpc" {
 }
 # Create FGT NIs
 module "eu_hub_nis" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_ni_sg"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_ni_sg"
   version = "0.0.1"
 
   prefix             = "${local.prefix}-eu-hub"
@@ -35,7 +35,7 @@ module "eu_hub_nis" {
 module "eu_hub_config" {
   for_each = { for k, v in module.eu_hub_nis.fgt_ports_config : k => v }
 
-  source  = "jmvigueras/ftnt-modules/aws//modules/fgt_config"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_config"
   version = "0.0.1"
 
   admin_cidr     = local.admin_cidr
@@ -59,7 +59,7 @@ module "eu_hub_config" {
 }
 # Create FGT for hub EU
 module "eu_hub" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/fgt"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt"
   version = "0.0.1"
 
   prefix        = "${local.prefix}-eu-hub"
@@ -75,7 +75,7 @@ module "eu_hub" {
 }
 # Update private RT route RFC1918 cidrs to FGT NI and Core Network
 module "eu_hub_vpc_routes" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/vpc_routes"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
   version = "0.0.1"
 
   ni_id     = module.eu_hub_nis.fgt_ids_map["az1.fgt1"]["port2.private"]
@@ -86,7 +86,7 @@ module "eu_hub_vpc_routes" {
 }
 # Crate test VM in bastion subnet
 module "eu_hub_vm" {
-  source  = "jmvigueras/ftnt-modules/aws//modules/vm"
+  source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
   version = "0.0.1"
 
   prefix          = "${local.prefix}-eu-hub"

@@ -5,7 +5,7 @@
 module "eu_spoke_to_core_net" {
   for_each = local.eu_spoke_to_core_net
 
-  source   = "jmvigueras/ftnt-modules/aws//modules/vpc"
+  source   = "jmvigueras/ftnt-aws-modules/aws//modules/vpc"
   version  = "0.0.1"
 
   prefix = "${local.prefix}-eu-core-net-spoke"
@@ -20,7 +20,7 @@ module "eu_spoke_to_core_net" {
 module "eu_spoke_to_core_net_routes" {
   for_each = local.eu_spoke_to_core_net
 
-  source   = "jmvigueras/ftnt-modules/aws//modules/vpc_routes"
+  source   = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
   version  = "0.0.1"
 
   core_network_arn = local.core_network_arn
@@ -32,7 +32,7 @@ module "eu_spoke_to_core_net_routes" {
 module "eu_spoke_to_core_net_vm" {
   for_each = local.eu_spoke_to_core_net
   
-  source   = "jmvigueras/ftnt-modules/aws//modules/vm"
+  source   = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
   version  = "0.0.1"
 
   prefix          = "${local.prefix}-${each.key}"
