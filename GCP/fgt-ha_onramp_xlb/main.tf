@@ -88,7 +88,7 @@ module "xlb" {
   prefix = local.prefix
   region = local.region
   zone1  = local.zone1
-  zone2  = local.zone1
+  zone2  = local.zone2
 
   vpc_names             = module.fgt_vpc.vpc_names
   subnet_names          = module.fgt_vpc.subnet_names
