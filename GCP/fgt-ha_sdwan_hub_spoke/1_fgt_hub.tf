@@ -18,7 +18,7 @@ module "hub_vpc" {
 #------------------------------------------------------------------------------------------------------------
 module "hub_config" {
   source  = "jmvigueras/ftnt-gcp-modules/gcp//modules/fgt_config"
-  version = "0.0.3"
+  version = "0.0.5"
 
   admin_cidr     = local.admin_cidr
   admin_port     = local.admin_port
@@ -35,6 +35,7 @@ module "hub_config" {
 
   config_xlb = true
   ilb_ip     = module.hub_vpc.ilb_ip
+  elb_ip     = google_compute_address.hub_elb_frontend_pip.address
 
   vpc-spoke_cidr = [module.hub_vpc.subnet_cidrs["bastion"]]
 }
@@ -68,9 +69,15 @@ module "hub" {
 #------------------------------------------------------------------------------------------------------------
 # Create Internal and External Load Balancer
 #------------------------------------------------------------------------------------------------------------
+# eLB Frontend public IP
+resource "google_compute_address" "hub_elb_frontend_pip" {
+  name         = "${local.prefix}-hub-elb-frontend-pip"
+  region       = local.region
+  address_type = "EXTERNAL"
+}
+# Create iLB and eLB
 module "hub_xlb" {
-  source  = "jmvigueras/ftnt-gcp-modules/gcp//modules/xlb"
-  version = "0.0.2"
+  source  = "./modules/xlb"
 
   prefix = "${local.prefix}-hub"
   region = local.region
@@ -80,6 +87,7 @@ module "hub_xlb" {
   vpc_names             = module.hub_vpc.vpc_names
   subnet_names          = module.hub_vpc.subnet_names
   ilb_ip                = module.hub_vpc.ilb_ip
+  elb_frontend_pip      = google_compute_address.hub_elb_frontend_pip.address
   fgt_active_self_link  = module.hub.fgt_active_self_link
-  fgt_passive_self_link = module.hub.fgt_passive_self_link[0]
+  fgt_passive_self_link = one(module.hub.fgt_passive_self_link)
 }

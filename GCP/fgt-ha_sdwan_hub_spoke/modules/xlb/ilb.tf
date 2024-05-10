@@ -14,7 +14,13 @@ resource "google_compute_region_health_check" "ilb_health-check_fgt" {
 resource "google_compute_instance_group" "lb_group_fgt-1" {
   name      = "${var.prefix}-lb-group-fgt-1"
   zone      = var.zone1
-  instances = [var.fgt_self_link]
+  instances = [var.fgt_active_self_link]
+}
+# Create FGT passive instance group
+resource "google_compute_instance_group" "lb_group_fgt-2" {
+  name      = "${var.prefix}-lb-group-fgt-2"
+  zone      = var.zone2
+  instances = [var.fgt_passive_self_link]
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -27,8 +33,14 @@ resource "google_compute_region_backend_service" "ilb" {
   region   = var.region
   network  = var.vpc_names["private"]
 
+  load_balancing_scheme = "INTERNAL"
+  protocol              = "UNSPECIFIED"
+
   backend {
     group = google_compute_instance_group.lb_group_fgt-1.id
+  }
+  backend {
+    group = google_compute_instance_group.lb_group_fgt-2.id
   }
 
   health_checks = [google_compute_region_health_check.ilb_health-check_fgt.id]
@@ -42,11 +54,10 @@ resource "google_compute_forwarding_rule" "ilb_fwd-rule_all" {
   region = var.region
 
   load_balancing_scheme = "INTERNAL"
-  backend_service       = google_compute_region_backend_service.ilb.id
   all_ports             = true
+  backend_service       = google_compute_region_backend_service.ilb.id
   network               = var.vpc_names["private"]
   subnetwork            = var.subnet_names["private"]
-  allow_global_access   = true
   ip_address            = var.ilb_ip
 }
 

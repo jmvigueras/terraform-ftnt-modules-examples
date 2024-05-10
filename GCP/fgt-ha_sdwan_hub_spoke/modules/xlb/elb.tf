@@ -7,7 +7,7 @@
 #---------------------------------------------------------------------
 # ELB Frontends
 resource "google_compute_address" "elb_frontend_pip" {
-  name         = "${var.prefix}-elb-frontend-pip"
+  name         = "${var.prefix}-elb-front-pip"
   region       = var.region
   address_type = "EXTERNAL"
 }
@@ -26,14 +26,18 @@ resource "google_compute_region_health_check" "elb_health-check_fgt" {
 
 # Create External Load Balancer
 resource "google_compute_region_backend_service" "elb" {
-  provider              = google-beta
-  name                  = "${var.prefix}-elb"
-  region                = var.region
+  provider = google-beta
+  name     = "${var.prefix}-elb"
+  region   = var.region
+
   load_balancing_scheme = "EXTERNAL"
   protocol              = "UNSPECIFIED"
 
   backend {
     group = google_compute_instance_group.lb_group_fgt-1.id
+  }
+  backend {
+    group = google_compute_instance_group.lb_group_fgt-2.id
   }
 
   health_checks = [google_compute_region_health_check.elb_health-check_fgt.id]
@@ -47,11 +51,11 @@ resource "google_compute_forwarding_rule" "elb_fwd-rule_l3" {
   name   = "${var.prefix}-elb-fwd-rule-l3"
   region = var.region
 
-  ip_address            = google_compute_address.elb_frontend_pip.id
+  load_balancing_scheme = "EXTERNAL"
   ip_protocol           = "L3_DEFAULT"
   all_ports             = true
-  load_balancing_scheme = "EXTERNAL"
   backend_service       = google_compute_region_backend_service.elb.id
+  ip_address            = var.elb_frontend_pip != null ? var.elb_frontend_pip : google_compute_address.elb_frontend_pip.id
 }
 
 # Create health checks (global)
