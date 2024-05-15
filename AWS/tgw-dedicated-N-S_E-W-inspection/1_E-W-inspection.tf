@@ -144,7 +144,7 @@ resource "aws_ec2_transit_gateway_route" "ew_tgw_route" {
 # Update private RT route RFC1918 cidrs to FGT NI and TGW
 module "ew_fgt_vpc_routes" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
-  version = "0.0.5"
+  version = "0.0.7"
 
   tgw_id     = module.tgw.tgw_id
   tgw_rt_ids = local.ew_tgw_rt_ids
