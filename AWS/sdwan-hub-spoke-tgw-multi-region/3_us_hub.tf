@@ -7,7 +7,7 @@
 # Create VPC for hub US
 module "us_hub_vpc" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix     = "${local.prefix}-us-hub"
   admin_cidr = local.admin_cidr
@@ -22,7 +22,7 @@ module "us_hub_vpc" {
 # Create FGT NIs
 module "us_hub_nis" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_ni_sg"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix             = "${local.prefix}-us-hub"
   azs                = local.us_azs
@@ -36,7 +36,7 @@ module "us_hub_config" {
   for_each = { for k, v in module.us_hub_nis.fgt_ports_config : k => v }
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_config"
-  version = "0.0.1"
+  version = "0.0.7"
 
   admin_cidr     = local.admin_cidr
   admin_port     = local.admin_port
@@ -75,7 +75,7 @@ module "us_hub_config" {
 # Create FGT for hub US
 module "us_hub" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix        = "${local.prefix}-us-hub"
   region        = local.us_region
@@ -91,7 +91,7 @@ module "us_hub" {
 # Create TGW
 module "us_tgw" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/tgw"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix = "${local.prefix}-us-hub"
 
@@ -101,7 +101,7 @@ module "us_tgw" {
 # Create TGW attachment
 module "us_hub_vpc_tgw_attachment" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/tgw_attachment"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix = "${local.prefix}-us-hub"
 
@@ -140,19 +140,21 @@ module "us_hub_vpc_tgw_connect" {
 # Update private RT route RFC1918 cidrs to FGT NI and TGW
 module "us_hub_vpc_routes" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
-  version = "0.0.1"
+  version = "0.0.7"
 
   tgw_id = module.us_tgw.tgw_id
   ni_id  = module.us_hub_nis.fgt_ids_map["az1.fgt1"]["port2.private"]
 
   ni_rt_ids  = local.us_hub_ni_rt_ids
   tgw_rt_ids = local.us_hub_tgw_rt_ids
+
+  destination_cidr_block = "10.0.0.0/8"
 }
 
 # Crate test VM in bastion subnet
 module "us_hub_vm" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix          = "${local.prefix}-us-hub"
   keypair         = aws_key_pair.us_keypair.key_name
@@ -168,7 +170,7 @@ module "us_spoke_to_tgw" {
   for_each = local.us_spoke_to_tgw
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix = "${local.prefix}-us-tgw-spoke"
   azs    = local.us_azs
@@ -183,7 +185,7 @@ module "us_spoke_to_tgw_attachment" {
   for_each = local.us_spoke_to_tgw
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/tgw_attachment"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix = "${local.prefix}-${each.key}"
 
@@ -200,19 +202,21 @@ module "us_spoke_to_tgw_routes" {
   for_each = local.us_spoke_to_tgw
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
-  version = "0.0.1"
+  version = "0.0.7"
 
   tgw_id = module.us_tgw.tgw_id
   tgw_rt_ids = { for pair in setproduct(["vm"], [for i, az in local.us_azs : "az${i + 1}"]) :
     "${pair[0]}-${pair[1]}" => module.us_spoke_to_tgw[each.key].rt_ids[pair[1]][pair[0]]
   }
+
+  destination_cidr_block = "10.0.0.0/8"
 }
 # Crate test VM in bastion subnet
 module "us_spoke_to_tgw_vm" {
   for_each = local.us_spoke_to_tgw
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix          = "${local.prefix}-${each.key}"
   keypair         = aws_key_pair.us_keypair.key_name

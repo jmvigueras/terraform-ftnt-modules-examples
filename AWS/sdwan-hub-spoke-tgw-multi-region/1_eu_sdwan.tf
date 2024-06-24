@@ -9,7 +9,7 @@ module "eu_sdwan_vpc" {
   for_each = { for i, v in local.eu_sdwan_spoke : i => v }
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix     = "${local.prefix}-${each.value["id"]}"
   admin_cidr = local.admin_cidr
@@ -26,7 +26,7 @@ module "eu_sdwan_nis" {
   for_each = { for i, v in local.eu_sdwan_spoke : i => v }
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_ni_sg"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix             = "${local.prefix}-${each.value["id"]}"
   azs                = local.eu_sdwan_azs
@@ -40,7 +40,7 @@ module "eu_sdwan_config" {
   for_each = { for i, v in local.eu_sdwan_config : "${v["sdwan_id"]}.${v["fgt_id"]}" => v }
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt_config"
-  version = "0.0.1"
+  version = "0.0.7"
 
   admin_cidr     = local.admin_cidr
   admin_port     = local.admin_port
@@ -62,7 +62,7 @@ module "eu_sdwan" {
   for_each = { for i, v in local.eu_sdwan_spoke : i => v }
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/fgt"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix        = "${local.prefix}-${each.value["id"]}"
   region        = local.eu_region
@@ -80,17 +80,19 @@ module "eu_sdwan_vpc_routes" {
   for_each = { for i, v in local.eu_sdwan_spoke : i => v }
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
-  version = "0.0.1"
+  version = "0.0.7"
 
   ni_id     = module.eu_sdwan_nis[each.key].fgt_ids_map["az1.fgt1"]["port2.private"]
   ni_rt_ids = local.eu_sdwan_ni_rt_ids[each.key]
+
+  destination_cidr_block = "10.0.0.0/8"
 }
 # Crate test VM in bastion subnet
 module "eu_sdwan_vm" {
   for_each = { for i, v in local.eu_sdwan_spoke : i => v }
 
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
-  version = "0.0.1"
+  version = "0.0.7"
 
   prefix          = "${local.prefix}-${each.value["id"]}"
   keypair         = aws_key_pair.eu_keypair.key_name

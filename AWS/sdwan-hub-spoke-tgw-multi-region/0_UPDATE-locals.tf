@@ -6,7 +6,7 @@ locals {
   #-----------------------------------------------------------------------------------------------------
   # General variables
   #-----------------------------------------------------------------------------------------------------
-  prefix = "test"
+  prefix = "global-sdwan"
 
   tags = {
     Project = "ftnt_modules_aws"
@@ -19,7 +19,7 @@ locals {
   admin_cidr = "${chomp(data.http.my-public-ip.response_body)}/32"
   //admin_cidr    = "0.0.0.0/0"
   instance_type = "c6i.large"
-  fgt_build     = "build1575"
+  fgt_build     = "build1639"
   license_type  = "payg"
 
   route53_zone_name = "fortidemoscloud.com"
@@ -80,7 +80,7 @@ locals {
 
   eu_sdwan_spoke = [for i in range(0, local.eu_sdwan_number) :
     { "id"      = "eu-office-${i + 1}"
-      "cidr"    = "192.168.${i + 101}.0/24"
+      "cidr"    = "10.1.${i + 201}.0/24"
       "bgp_asn" = local.eu_spoke_bgp_asn
     }
   ]
@@ -157,7 +157,7 @@ locals {
 
   us_sdwan_spoke = [for i in range(0, local.us_sdwan_number) :
     { "id"      = "us-office-${i + 1}"
-      "cidr"    = "192.168.${i + 201}.0/24"
+      "cidr"    = "10.3.${i + 201}.0/24"
       "bgp_asn" = local.us_spoke_bgp_asn
     }
   ]
