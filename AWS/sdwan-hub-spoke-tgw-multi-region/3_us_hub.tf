@@ -55,22 +55,18 @@ module "us_hub_config" {
   config_hub = true
   hub        = local.us_hub
 
-  /*
-  config_tgw_gre = true
-  tgw_gre_peer = {
-    tgw_ip        = one([for i, v in local.us_hub_tgw_peers : v["tgw_ip"] if v["id"] == each.key])
-    inside_cidr   = one([for i, v in local.us_hub_tgw_peers : v["inside_cidr"] if v["id"] == each.key])
-    twg_bgp_asn   = local.us_tgw_bgp_asn
-    route_map_out = "rm_out_hub_to_external_0" //created by default prepend routes with community 65001:10
-    route_map_in  = ""
-    gre_name      = "gre-to-tgw"
-  }
-  */
-
   config_vxlan = true
   vxlan_peers  = local.us_hub_vxlan_peers[each.key]
 
-  static_route_cidrs = [local.us_hub_vpc_cidr, local.us_tgw_cidr, local.eu_hub_vpc_cidr] //necessary routes to stablish BGP peerings and bastion connection
+  static_route_cidrs = concat([
+    local.us_hub_vpc_cidr,
+    local.us_tgw_cidr,
+    local.eu_hub_vpc_cidr
+    ],
+    [
+      for i in range(0, local.us_sdwan_number) : "10.3.${i + 101}.0/24"
+    ]
+  ) //necessary routes to stablish BGP peerings and TGW spokes vpcs
 }
 # Create FGT for hub US
 module "us_hub" {
@@ -150,7 +146,7 @@ module "us_hub_vpc_routes" {
 
   destination_cidr_block = "10.0.0.0/8"
 }
-
+/*
 # Crate test VM in bastion subnet
 module "us_hub_vm" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
@@ -162,6 +158,7 @@ module "us_hub_vm" {
   subnet_cidr     = module.us_hub_vpc.subnet_cidrs["az1"]["bastion"]
   security_groups = [module.us_hub_vpc.sg_ids["default"]]
 }
+*/
 #------------------------------------------------------------------------------
 # VPC Spoke to TGW
 #------------------------------------------------------------------------------

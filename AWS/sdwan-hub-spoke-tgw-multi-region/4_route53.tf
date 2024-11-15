@@ -28,7 +28,7 @@ resource "aws_route53_record" "eu_hub_vpn_fqdn_fgts" {
   zone_id = data.aws_route53_zone.route53_zone.zone_id
   name    = "${replace(each.key, ".", "")}.eu-hub.${local.route53_zone_name}"
   type    = "A"
-  ttl     = "30"
+  ttl     = "300"
   records = [each.value]
 }
 # Health-check parent
@@ -49,7 +49,7 @@ resource "aws_route53_record" "eu_hub_vpn_fqdn" {
   zone_id = data.aws_route53_zone.route53_zone.zone_id
   name    = local.eu_hub_vpn_ddns
   type    = "CNAME"
-  ttl     = 30
+  ttl     = "300"
 
   weighted_routing_policy {
     weight = floor(100 / length(keys(local.eu_hub_public_eips)))
@@ -85,7 +85,7 @@ resource "aws_route53_record" "eu_op_vpn_fqdn_fgts" {
   zone_id = data.aws_route53_zone.route53_zone.zone_id
   name    = "${replace(each.key, ".", "")}.eu-op.${local.route53_zone_name}"
   type    = "A"
-  ttl     = "30"
+  ttl     = "300"
   records = [each.value]
 }
 # Health-check parent
@@ -106,7 +106,7 @@ resource "aws_route53_record" "eu_op_vpn_fqdn" {
   zone_id = data.aws_route53_zone.route53_zone.zone_id
   name    = local.eu_op_vpn_ddns
   type    = "CNAME"
-  ttl     = 30
+  ttl     = "300"
 
   weighted_routing_policy {
     weight = floor(100 / length(local.eu_op_public_eips))

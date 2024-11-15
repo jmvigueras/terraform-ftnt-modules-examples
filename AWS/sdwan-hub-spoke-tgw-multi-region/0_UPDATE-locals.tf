@@ -12,13 +12,13 @@ locals {
     Project = "ftnt_modules_aws"
   }
 
-  eu_region = "eu-west-1"
-  eu_azs    = ["eu-west-1a", "eu-west-1b"]
+  eu_region = "eu-south-2"
+  eu_azs    = ["eu-south-2a", "eu-south-2b"]
 
   admin_port = "8443"
   admin_cidr = "${chomp(data.http.my-public-ip.response_body)}/32"
   //admin_cidr    = "0.0.0.0/0"
-  instance_type = "c6i.large"
+  instance_type = "c6in.large"
   fgt_build     = "build1639"
   license_type  = "payg"
 
@@ -72,7 +72,7 @@ locals {
   #-----------------------------------------------------------------------------------------------------
   # General variables 
   eu_sdwan_number_peer_az = 1
-  eu_sdwan_azs            = ["eu-west-1a"]
+  eu_sdwan_azs            = ["eu-south-2a"]
 
   # VPN HUB variables
   eu_sdwan_number  = 2
@@ -88,8 +88,8 @@ locals {
   #-----------------------------------------------------------------------------------------------------
   # EU - EMEA ON-PREMISE HUB
   #-----------------------------------------------------------------------------------------------------
-  us_region = "eu-west-1"
-  us_azs    = ["eu-west-1a", "eu-west-1b"]
+  us_region = "eu-south-2"
+  us_azs    = ["eu-south-2a", "eu-south-2b"]
 
   # fgt_subnet_tags -> add tags to FGT subnets (port1, port2, public, private ...)
   eu_op_fgt_subnet_tags = {
@@ -149,7 +149,7 @@ locals {
   #-----------------------------------------------------------------------------------------------------
   # General variables 
   us_sdwan_number_peer_az = 1
-  us_sdwan_azs            = ["eu-west-1a"]
+  us_sdwan_azs            = ["eu-south-2a"]
 
   # SPOKE SDWAN VPN HUB variables
   us_sdwan_number  = 2

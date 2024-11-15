@@ -9,14 +9,14 @@ output "eu_hub_ni_list" {
   value = module.eu_hub_nis.fgt_ni_list
 }
 
-output "eu_hub_vm" {
-  value = module.eu_hub_vm.vm
-}
-
 output "eu_spoke_to_tgw_vm" {
   value = { for k, v in module.eu_spoke_to_tgw_vm : k => v.vm }
 }
-
+/*
+output "eu_hub_vm" {
+  value = module.eu_hub_vm.vm
+}
+*/
 #-----------------------------------------------------------------------------------------------------
 # EU SDWAN SPOKES
 #-----------------------------------------------------------------------------------------------------
@@ -42,11 +42,11 @@ output "eu_op_ids" {
 output "eu_op_ni_list" {
   value = module.eu_op_nis.fgt_ni_list
 }
-
+/*
 output "eu_op_vm" {
   value = module.eu_op_vm.vm
 }
-
+*/
 #-----------------------------------------------------------------------------------------------------
 # US - NORAM HUB
 #-----------------------------------------------------------------------------------------------------
@@ -58,14 +58,15 @@ output "us_hub_ni_list" {
   value = module.us_hub_nis.fgt_ni_list
 }
 
-output "us_hub_vm" {
-  value = module.us_hub_vm.vm
-}
-
 output "us_spoke_to_tgw_vm" {
   value = { for k, v in module.us_spoke_to_tgw_vm : k => v.vm }
 }
 
+/*
+output "us_hub_vm" {
+  value = module.us_hub_vm.vm
+}
+*/
 #-----------------------------------------------------------------------------------------------------
 # US SDWAN SPOKES
 #-----------------------------------------------------------------------------------------------------
@@ -96,7 +97,6 @@ output "debugs" {
 output "eu_sdwan_ni_list" {
   value = { for k, v in module.eu_sdwan_nis : k => v.ni_list }
 }
-
 output "eu_hub_public_eips" {
   value = local.eu_hub_public_eips
 }

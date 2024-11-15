@@ -86,8 +86,6 @@ module "eu_op_vpc_tgw_attachment" {
   vpc_id         = module.eu_op_vpc.vpc_id
   tgw_id         = module.eu_tgw.tgw_id
   tgw_subnet_ids = compact([for i, az in local.eu_azs : lookup(module.eu_op_vpc.subnet_ids["az${i + 1}"], "tgw", "")])
-  //rt_association_id  = module.eu_tgw.rt_default_id
-  //rt_propagation_ids = [module.eu_tgw.rt_default_id]
 
   default_rt_association = true
   default_rt_propagation = true
@@ -98,14 +96,15 @@ module "eu_op_vpc_routes" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vpc_routes"
   version = "0.0.7"
 
-  tgw_id = module.eu_tgw.tgw_id
-  ni_id  = module.eu_op_nis.fgt_ids_map["az1.fgt1"]["port2.private"]
-
-  ni_rt_ids  = local.eu_op_ni_rt_ids
+  tgw_id     = module.eu_tgw.tgw_id
   tgw_rt_ids = local.eu_op_tgw_rt_ids
+
+  ni_id     = module.eu_op_nis.fgt_ids_map["az1.fgt1"]["port2.private"]
+  ni_rt_ids = local.eu_op_ni_rt_ids
 
   destination_cidr_block = "10.0.0.0/8"
 }
+/*
 # Crate test VM in bastion subnet
 module "eu_op_vm" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
@@ -117,3 +116,4 @@ module "eu_op_vm" {
   subnet_cidr     = module.eu_op_vpc.subnet_cidrs["az1"]["bastion"]
   security_groups = [module.eu_op_vpc.sg_ids["default"]]
 }
+*/

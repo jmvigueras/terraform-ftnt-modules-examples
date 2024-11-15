@@ -59,8 +59,8 @@ module "eu_hub_config" {
   tgw_gre_peer = {
     tgw_ip        = one([for i, v in local.eu_hub_tgw_peers : v["tgw_ip"] if v["id"] == each.key])
     inside_cidr   = one([for i, v in local.eu_hub_tgw_peers : v["inside_cidr"] if v["id"] == each.key])
-    twg_bgp_asn   = local.eu_tgw_bgp_asn
-    route_map_out = "rm_out_hub_to_external_0" //created by default prepend routes with community 65001:10
+    tgw_bgp_asn   = local.eu_tgw_bgp_asn
+    route_map_out = "rm_out_hub_to_external_0" // Modify AS path from vxlan peered cluster member
     route_map_in  = ""
     gre_name      = "gre-to-tgw"
   }
@@ -106,8 +106,6 @@ module "eu_hub_vpc_tgw_attachment" {
   vpc_id         = module.eu_hub_vpc.vpc_id
   tgw_id         = module.eu_tgw.tgw_id
   tgw_subnet_ids = compact([for i, az in local.eu_azs : lookup(module.eu_hub_vpc.subnet_ids["az${i + 1}"], "tgw", "")])
-  //rt_association_id  = module.eu_tgw.rt_default_id
-  //rt_propagation_ids = [module.eu_tgw.rt_default_id]
 
   default_rt_association = true
   default_rt_propagation = true
@@ -142,7 +140,7 @@ module "eu_hub_vpc_routes" {
 
   destination_cidr_block = "10.0.0.0/8"
 }
-
+/*
 # Crate test VM in bastion subnet
 module "eu_hub_vm" {
   source  = "jmvigueras/ftnt-aws-modules/aws//modules/vm"
@@ -154,6 +152,7 @@ module "eu_hub_vm" {
   subnet_cidr     = module.eu_hub_vpc.subnet_cidrs["az1"]["bastion"]
   security_groups = [module.eu_hub_vpc.sg_ids["default"]]
 }
+*/
 #------------------------------------------------------------------------------
 # VPC Spoke to TGW
 #------------------------------------------------------------------------------
@@ -238,7 +237,7 @@ resource "aws_ec2_transit_gateway_route" "eu_tgw_route_to_us_tgw" {
 
   destination_cidr_block         = local.us_hub_vpc_cidr
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peer_eu_us.id
-  transit_gateway_route_table_id = module.eu_tgw.rt_default_id
+  transit_gateway_route_table_id = module.eu_tgw.rt_post_inspection_id
 }
 locals {
   tgw_peer_eu_us_id = "" // Update from GUI after accept attachment  
