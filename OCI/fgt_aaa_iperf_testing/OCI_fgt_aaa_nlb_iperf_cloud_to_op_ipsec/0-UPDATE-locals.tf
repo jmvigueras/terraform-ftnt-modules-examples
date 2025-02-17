@@ -43,7 +43,7 @@ locals {
 # IPERF test variables
 #-----------------------------------------------------------------------------------------------------
 locals {
-  iperf_vms       = 20 //number of linux vm performing IPERF between sites
+  iperf_vms       = 0 //number of linux vm performing IPERF between sites
   iperf_parallels = 50 //number of parallels iperf peer test
   iperf_loop      = 60 //number of seconds to repeat the iperf test
   iperf_window    = "256K"
